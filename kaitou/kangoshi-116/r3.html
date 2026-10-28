@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}[hidden]{display:none!important}</style>
+<title>看護模試 第3回 解答・採点</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=BIZ+UDPMincho:wght@700&display=swap">
+<style>
+/* Layout: マークシートの紙面。上に回・科目の帯、下に解答行の一覧。結果タブは要約→分野別→誤答の順 */
+:root{
+  --paper:#fbfaf6; --sheet:#ffffff; --ink:#23262b; --muted:#6b6f76;
+  --omr:#d9576b; --omr-soft:#fbe8eb; --rule:#ecd3d8;
+  --mark:#23262b; --ok:#1f7a55; --ok-soft:#e3f2ea; --ng:#b4342b; --ng-soft:#f8e3e1;
+  --hisshu:#2f5f9e; --ippan:#6b6f76; --jokyo:#8a5a12;
+  --f-body:"BIZ UDPGothic","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  --f-head:"BIZ UDPMincho","Hiragino Mincho ProN","Yu Mincho",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#16181b; --sheet:#1e2125; --ink:#e8e6e1; --muted:#a3a7ad;
+  --omr:#ef8596; --omr-soft:#3a2328; --rule:#4a2f35; --mark:#f3f1ec;
+  --ok:#5fc597; --ok-soft:#183027; --ng:#ef8a80; --ng-soft:#3a1f1d;
+  --hisshu:#86aee6; --ippan:#a3a7ad; --jokyo:#d9a45a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#16181b; --sheet:#1e2125; --ink:#e8e6e1; --muted:#a3a7ad;
+  --omr:#ef8596; --omr-soft:#3a2328; --rule:#4a2f35; --mark:#f3f1ec;
+  --ok:#5fc597; --ok-soft:#183027; --ng:#ef8a80; --ng-soft:#3a1f1d;
+  --hisshu:#86aee6; --ippan:#a3a7ad; --jokyo:#d9a45a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
+.wrap{max-width:760px;margin:0 auto;padding-block:20px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-family:var(--f-head);font-size:1.45rem;line-height:1.35;margin:0;text-wrap:balance}
+.eyebrow{font-size:.78rem;letter-spacing:.08em;color:var(--omr);font-weight:700}
+.lead{color:var(--muted);font-size:.9rem;margin:6px 0 0}
+header{display:grid;gap:4px;margin-bottom:16px}
+.tabs{display:flex;gap:6px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);padding-block:8px;border-bottom:2px solid var(--omr)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.tab{flex:1;font:inherit;font-weight:700;padding:10px 6px;border:1.5px solid var(--omr);background:var(--sheet);color:var(--omr);border-radius:6px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--omr);color:var(--sheet)}
+.tab small{display:block;font-weight:400;font-size:.72rem;opacity:.85}
+.bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;margin:12px 0}
+.timer{font-variant-numeric:tabular-nums;font-size:1.25rem;font-weight:700;letter-spacing:.02em}
+.btn{font:inherit;font-size:.88rem;padding:7px 12px;border-radius:6px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:700}
+.btn:focus-visible,.tab:focus-visible,.oval:focus-visible,.num:focus-visible{outline:3px solid var(--hisshu);outline-offset:2px}
+.sheet{background:var(--sheet);border:1.5px solid var(--omr);border-radius:4px}
+.blockhead{display:flex;justify-content:space-between;gap:8px;background:var(--omr-soft);color:var(--omr);font-weight:700;font-size:.82rem;padding:6px 12px;border-bottom:1px solid var(--rule);letter-spacing:.04em}
+.row{display:grid;grid-template-columns:3.2em 1fr;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--rule)}
+.row:last-child{border-bottom:0}
+.qno{font-variant-numeric:tabular-nums;font-weight:700;color:var(--omr);text-align:right}
+.qno small{display:block;font-weight:400;font-size:.66rem;color:var(--muted);letter-spacing:.04em}
+.ovals{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.oval{width:2.3em;height:1.55em;border-radius:50%/50%;border:1.5px solid var(--omr);background:transparent;color:var(--omr);font:inherit;font-size:.9rem;font-weight:700;cursor:pointer;display:grid;place-items:center;padding:0}
+.oval[aria-pressed="true"]{background:var(--mark);border-color:var(--mark);color:var(--sheet)}
+.tag{font-size:.7rem;color:var(--omr);border:1px solid var(--omr);border-radius:3px;padding:0 4px;margin-left:2px}
+.num{width:7em;font:inherit;padding:4px 8px;border:1.5px solid var(--omr);border-radius:4px;background:transparent;color:var(--ink);font-variant-numeric:tabular-nums}
+.unit{color:var(--muted);font-size:.85rem}
+.row.ok{background:var(--ok-soft)} .row.ng{background:var(--ng-soft)}
+.judge{font-size:.78rem;font-weight:700;margin-left:auto}
+.judge.ok{color:var(--ok)} .judge.ng{color:var(--ng)}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:12px 0 20px}
+.card{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:14px}
+.card h3{margin:0 0 4px;font-size:.85rem;color:var(--muted);font-weight:700}
+.big{font-size:1.9rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.big small{font-size:.9rem;color:var(--muted);font-weight:400}
+.pill{display:inline-block;font-size:.75rem;font-weight:700;border-radius:999px;padding:2px 10px;margin-top:6px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.ng{background:var(--ng-soft);color:var(--ng)}
+.note{font-size:.8rem;color:var(--muted);margin:6px 0 0}
+h2{font-family:var(--f-head);font-size:1.1rem;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--rule);font-variant-numeric:tabular-nums}
+th{color:var(--muted);font-weight:700;font-size:.78rem}
+.meter{height:8px;background:var(--omr-soft);border-radius:4px;overflow:hidden;min-width:60px}
+.meter span{display:block;height:100%;background:var(--ink)}
+.meter.low span{background:var(--ng)}
+.tblwrap{overflow-x:auto;background:var(--sheet);border:1px solid var(--rule);border-radius:6px}
+.wrong{display:flex;flex-wrap:wrap;gap:6px}
+.wrong span{font-size:.82rem;border:1px solid var(--rule);background:var(--sheet);border-radius:4px;padding:3px 8px;font-variant-numeric:tabular-nums}
+.wrong b{color:var(--ng)}
+.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--ng-soft);border-radius:6px;padding:8px 12px;margin:8px 0;font-size:.88rem}
+.howto{background:var(--sheet);border:1px dashed var(--rule);border-radius:6px;padding:10px 14px;font-size:.85rem;color:var(--muted);margin:0 0 12px}
+.howto ol{margin:4px 0 0;padding-left:1.3em}
+@media (prefers-reduced-motion:no-preference){.oval{transition:background .12s}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">看護師国家試験 第116回対策 模擬試験</div>
+  <h1>第3回 解答・採点シート</h1>
+  <p class="lead">問題を解きながら番号をタップしてください。終わったら「採点する」で、必修・一般・状況設定と分野ごとの正答率が出ます。名前などの入力は不要で、解答はこの端末の中だけに残ります。</p>
+</header>
+
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" id="tab-am" aria-selected="true" data-v="am">午前<small id="cnt-am">0/120</small></button>
+  <button class="tab" role="tab" id="tab-pm" aria-selected="false" data-v="pm">午後<small id="cnt-pm">0/120</small></button>
+  <button class="tab" role="tab" id="tab-res" aria-selected="false" data-v="res">結果<small>採点</small></button>
+</div>
+
+<section id="v-sheet">
+  <div class="bar">
+    <div><span class="timer" id="timer">2:40:00</span> <span class="note" style="display:inline">残り時間（本番と同じ2時間40分）</span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" id="tbtn">タイマー開始</button>
+      <button class="btn" id="sample">サンプル解答で試す</button>
+      <button class="btn primary" id="grade">採点する</button>
+    </div>
+  </div>
+  <div class="howto">使い方<ol><li>本の問題を見ながら、選んだ番号をタップ（もう一度タップで取り消し）。「2つ」の問は2つ選びます。</li><li>計算問題は数値だけを入力します（単位は不要）。</li><li>午前・午後とも終わったら「採点する」。</li></ol></div>
+  <div id="sheet"></div>
+  <div class="bar"><button class="btn" id="clear">この回の解答をすべて消す</button><button class="btn primary" id="grade2">採点する</button></div>
+  <div id="confirm" hidden class="confirm">午前・午後の解答をすべて消します。よろしいですか？ <button class="btn" id="cyes">消す</button><button class="btn" id="cno">やめる</button></div>
+</section>
+
+<section id="v-res" hidden></section>
+</div>
+
+<script>
+const KEY=[[0,1,"H",4,"3","","人体の構造と機能"],[0,2,"H",4,"2","","人体の構造と機能"],[0,3,"H",4,"4","","人体の構造と機能"],[0,4,"H",4,"3","","人体の構造と機能"],[0,5,"H",4,"2","","人体の構造と機能"],[0,6,"H",4,"4","","人体の構造と機能"],[0,7,"H",4,"2","","疾病の成り立ち"],[0,8,"H",4,"2","","疾病の成り立ち"],[0,9,"H",4,"4","","基礎看護"],[0,10,"H",4,"4","","基礎看護"],[0,11,"H",4,"3","","基礎看護"],[0,12,"H",4,"3","","基礎看護"],[0,13,"H",4,"1","","基礎看護"],[0,14,"H",4,"1","","基礎看護"],[0,15,"H",4,"1","","基礎看護"],[0,16,"H",4,"2","","看護の統合と実践"],[0,17,"H",4,"3","","看護の統合と実践"],[0,18,"H",4,"2","","健康支援と社会保障"],[0,19,"H",4,"1","","小児"],[0,20,"H",4,"4","","母性"],[0,21,"H",4,"3","","老年"],[0,22,"H",4,"1","","基礎看護"],[0,23,"H",4,"4","","基礎看護"],[0,24,"H",4,"2","","老年"],[0,25,"H",4,"4","","健康支援と社会保障"],[0,26,"I",4,"2","","人体の構造と機能"],[0,27,"I",4,"1","","疾病の成り立ち"],[0,28,"I",4,"4","","成人・腎"],[0,29,"I",5,"5","","疾病の成り立ち"],[0,30,"I",4,"2","","基礎看護"],[0,31,"I",4,"2","","疾病の成り立ち"],[0,32,"I",5,"35","","疾病の成り立ち"],[0,33,"I",4,"4","","成人・代謝"],[0,34,"I","c","7.5","％","基礎看護"],[0,35,"I","c","12.5","g","基礎看護"],[0,36,"I",4,"4","","健康支援と社会保障"],[0,37,"I",5,"2","","看護の統合と実践"],[0,38,"I",4,"1","","看護の統合と実践"],[0,39,"I",4,"2","","健康支援と社会保障"],[0,40,"I",4,"3","","健康支援と社会保障"],[0,41,"I",4,"1","","基礎看護"],[0,42,"I",5,"1","","基礎看護"],[0,43,"I",4,"3","","基礎看護"],[0,44,"I",4,"4","","基礎看護"],[0,45,"I",4,"4","","基礎看護"],[0,46,"I",5,"25","","基礎看護"],[0,47,"I",4,"4","","基礎看護"],[0,48,"I",4,"3","","基礎看護"],[0,49,"I",4,"3","","成人・呼吸器"],[0,50,"I",4,"2","","基礎看護"],[0,51,"I",4,"1","","成人・脳神経"],[0,52,"I",4,"1","","成人・循環器"],[0,53,"I",5,"13","","成人・循環器"],[0,54,"I",4,"1","","成人・腎"],[0,55,"I",4,"2","","成人・消化器"],[0,56,"I",5,"25","","成人・代謝"],[0,57,"I",4,"1","","成人・消化器"],[0,58,"I",5,"14","","成人・運動器"],[0,59,"I",5,"3","","基礎看護"],[0,60,"I",4,"4","","成人・感覚器"],[0,61,"I",4,"1","","成人・脳神経"],[0,62,"I",4,"4","","成人・腎"],[0,63,"I",4,"3","","老年"],[0,64,"I",4,"1","","老年"],[0,65,"I",4,"3","","老年"],[0,66,"I",4,"3","","老年"],[0,67,"I",5,"1","","老年"],[0,68,"I",4,"1","","老年"],[0,69,"I",4,"3","","小児"],[0,70,"I",4,"2","","小児"],[0,71,"I",5,"35","","小児"],[0,72,"I",4,"1","","小児"],[0,73,"I",4,"3","","小児"],[0,74,"I",5,"4","","母性"],[0,75,"I",4,"4","","母性"],[0,76,"I",4,"4","","母性"],[0,77,"I",4,"1","","母性"],[0,78,"I",4,"2","","母性"],[0,79,"I",5,"2","","精神"],[0,80,"I",4,"2","","精神"],[0,81,"I",4,"1","","精神"],[0,82,"I",4,"4","","精神"],[0,83,"I",4,"3","","精神"],[0,84,"I",4,"1","","老年"],[0,85,"I",5,"3","","在宅"],[0,86,"I",4,"3","","在宅"],[0,87,"I",4,"4","","在宅"],[0,88,"I",5,"24","","在宅"],[0,89,"I",4,"3","","看護の統合と実践"],[0,90,"I",4,"2","","看護の統合と実践"],[0,91,"J",4,"2","","成人・呼吸器"],[0,92,"J",5,"4","","成人・呼吸器"],[0,93,"J",4,"1","","成人・呼吸器"],[0,94,"J",4,"3","","成人・内分泌"],[0,95,"J",5,"2","","成人・内分泌"],[0,96,"J",4,"4","","成人・内分泌"],[0,97,"J",4,"1","","成人・腎"],[0,98,"J",4,"4","","成人・腎"],[0,99,"J",4,"1","","成人・腎"],[0,100,"J",4,"1","","老年"],[0,101,"J",4,"3","","老年"],[0,102,"J",4,"3","","老年"],[0,103,"J",4,"2","","小児"],[0,104,"J",5,"24","","小児"],[0,105,"J",4,"2","","小児"],[0,106,"J",4,"2","","母性"],[0,107,"J",4,"1","","母性"],[0,108,"J",4,"4","","母性"],[0,109,"J",4,"3","","精神"],[0,110,"J",4,"3","","精神"],[0,111,"J",4,"2","","精神"],[0,112,"J",5,"13","","在宅"],[0,113,"J",4,"4","","在宅"],[0,114,"J",4,"1","","在宅"],[0,115,"J",4,"3","","看護の統合と実践"],[0,116,"J",4,"3","","看護の統合と実践"],[0,117,"J",4,"2","","看護の統合と実践"],[0,118,"J",4,"1","","成人・感染症"],[0,119,"J",4,"3","","成人・感染症"],[0,120,"J",4,"4","","成人・感染症"],[1,1,"H",4,"4","","人体の構造と機能"],[1,2,"H",4,"3","","人体の構造と機能"],[1,3,"H",4,"3","","人体の構造と機能"],[1,4,"H",4,"3","","人体の構造と機能"],[1,5,"H",4,"2","","人体の構造と機能"],[1,6,"H",4,"1","","人体の構造と機能"],[1,7,"H",4,"3","","成人・代謝"],[1,8,"H",4,"3","","基礎看護"],[1,9,"H",4,"3","","基礎看護"],[1,10,"H",4,"4","","基礎看護"],[1,11,"H",4,"3","","基礎看護"],[1,12,"H",4,"1","","基礎看護"],[1,13,"H",4,"2","","健康支援と社会保障"],[1,14,"H",4,"4","","健康支援と社会保障"],[1,15,"H",4,"1","","健康支援と社会保障"],[1,16,"H",4,"2","","健康支援と社会保障"],[1,17,"H",4,"1","","小児"],[1,18,"H",4,"4","","小児"],[1,19,"H",4,"1","","母性"],[1,20,"H",4,"4","","基礎看護"],[1,21,"H",4,"4","","基礎看護"],[1,22,"H",4,"4","","基礎看護"],[1,23,"H",4,"2","","基礎看護"],[1,24,"H",4,"4","","疾病の成り立ち"],[1,25,"H",4,"2","","看護の統合と実践"],[1,26,"I",4,"3","","疾病の成り立ち"],[1,27,"I",4,"3","","疾病の成り立ち"],[1,28,"I",4,"2","","成人・消化器"],[1,29,"I",4,"4","","疾病の成り立ち"],[1,30,"I",4,"4","","成人・腎"],[1,31,"I",5,"15","","人体の構造と機能"],[1,32,"I",4,"1","","疾病の成り立ち"],[1,33,"I",5,"3","","人体の構造と機能"],[1,34,"I",4,"4","","成人・内分泌"],[1,35,"I","c","800","mL","基礎看護"],[1,36,"I",4,"1","","健康支援と社会保障"],[1,37,"I",4,"4","","健康支援と社会保障"],[1,38,"I",4,"4","","看護の統合と実践"],[1,39,"I",4,"2","","看護の統合と実践"],[1,40,"I",5,"5","","健康支援と社会保障"],[1,41,"I",4,"1","","基礎看護"],[1,42,"I",5,"1","","基礎看護"],[1,43,"I",5,"24","","基礎看護"],[1,44,"I",4,"1","","基礎看護"],[1,45,"I",4,"4","","基礎看護"],[1,46,"I",5,"1","","成人・周術期"],[1,47,"I",4,"4","","基礎看護"],[1,48,"I","c","3","mL","基礎看護"],[1,49,"I",5,"24","","成人・呼吸器"],[1,50,"I",4,"4","","成人・呼吸器"],[1,51,"I",4,"2","","成人・循環器"],[1,52,"I",4,"3","","成人・周術期"],[1,53,"I",4,"4","","成人・脳神経"],[1,54,"I",5,"24","","健康支援と社会保障"],[1,55,"I",4,"4","","成人・腎"],[1,56,"I",4,"2","","成人・感覚器"],[1,57,"I",4,"4","","成人・感染症"],[1,58,"I",5,"24","","成人・運動器"],[1,59,"I",4,"4","","成人・感覚器"],[1,60,"I",4,"3","","看護の統合と実践"],[1,61,"I",4,"1","","成人・脳神経"],[1,62,"I",4,"1","","成人・呼吸器"],[1,63,"I",4,"2","","老年"],[1,64,"I",4,"3","","老年"],[1,65,"I",5,"14","","老年"],[1,66,"I",4,"2","","老年"],[1,67,"I",4,"1","","老年"],[1,68,"I",4,"4","","老年"],[1,69,"I",4,"3","","小児"],[1,70,"I",5,"3","","小児"],[1,71,"I",4,"4","","小児"],[1,72,"I",5,"14","","小児"],[1,73,"I",4,"4","","小児"],[1,74,"I",4,"2","","母性"],[1,75,"I",4,"2","","母性"],[1,76,"I",4,"2","","母性"],[1,77,"I",4,"4","","母性"],[1,78,"I",4,"2","","母性"],[1,79,"I",4,"4","","精神"],[1,80,"I",4,"2","","精神"],[1,81,"I",4,"1","","精神"],[1,82,"I",4,"3","","精神"],[1,83,"I",4,"2","","精神"],[1,84,"I",5,"45","","在宅"],[1,85,"I",4,"2","","在宅"],[1,86,"I",5,"2","","在宅"],[1,87,"I",4,"3","","在宅"],[1,88,"I",4,"1","","在宅"],[1,89,"I",4,"1","","看護の統合と実践"],[1,90,"I",5,"5","","看護の統合と実践"],[1,91,"J",4,"3","","成人・脳神経"],[1,92,"J",4,"3","","成人・脳神経"],[1,93,"J",4,"2","","成人・脳神経"],[1,94,"J",4,"3","","成人・消化器"],[1,95,"J",4,"2","","成人・消化器"],[1,96,"J",4,"3","","成人・消化器"],[1,97,"J",4,"2","","成人・感染症"],[1,98,"J",4,"2","","成人・感染症"],[1,99,"J",4,"3","","成人・感染症"],[1,100,"J",4,"3","","老年"],[1,101,"J",5,"24","","老年"],[1,102,"J",4,"4","","老年"],[1,103,"J",4,"1","","小児"],[1,104,"J",4,"2","","小児"],[1,105,"J",4,"3","","小児"],[1,106,"J",4,"4","","母性"],[1,107,"J",5,"14","","母性"],[1,108,"J",4,"3","","母性"],[1,109,"J",4,"3","","精神"],[1,110,"J",5,"4","","精神"],[1,111,"J",4,"4","","精神"],[1,112,"J",4,"3","","精神"],[1,113,"J",4,"3","","精神"],[1,114,"J",4,"4","","精神"],[1,115,"J",4,"1","","在宅"],[1,116,"J",4,"2","","在宅"],[1,117,"J",4,"3","","在宅"],[1,118,"J",4,"2","","成人・緩和ケア"],[1,119,"J",4,"1","","成人・緩和ケア"],[1,120,"J",4,"2","","成人・緩和ケア"]];
+const KNAME={H:"必修",I:"一般",J:"状況設定"};
+const ST="kango116_r3_v19";
+let ans={}, view="am", remain=9600, running=false, tick=null;
+try{const s=JSON.parse(localStorage.getItem(ST)||"{}"); ans=s.ans||{}; if(typeof s.remain==="number") remain=s.remain;}catch(e){}
+function save(){try{localStorage.setItem(ST,JSON.stringify({ans,remain}))}catch(e){}}
+const id=q=>(q[0]?"p":"a")+q[1];
+function fmt(t){const h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;return h+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
+function isDone(q){const v=ans[id(q)];if(q[3]==="c")return v!==undefined&&v!=="";if(!v)return false;return v.length===(q[4].length)}
+function counts(){[0,1].forEach(s=>{const n=KEY.filter(q=>q[0]===s&&isDone(q)).length;document.getElementById(s?"cnt-pm":"cnt-am").textContent=n+"/120"})}
+function render(){
+  const s=view==="pm"?1:0, el=document.getElementById("sheet"); el.innerHTML="";
+  const blocks=[["必修問題",1,25],["一般問題",26,90],["状況設定問題",91,120]];
+  blocks.forEach(([name,a,b])=>{
+    const box=document.createElement("div");box.className="sheet";box.style.marginBottom="12px";
+    box.innerHTML=`<div class="blockhead"><span>${s?"午後":"午前"}　${name}</span><span>問${a}〜${b}</span></div>`;
+    KEY.filter(q=>q[0]===s&&q[1]>=a&&q[1]<=b).forEach(q=>{
+      const r=document.createElement("div");r.className="row";const k=id(q);
+      let inner="";
+      if(q[3]==="c"){inner=`<input class="num" id="in-${k}" inputmode="decimal" placeholder="数値" value="${ans[k]??""}" aria-label="問${q[1]}の解答"><span class="unit">単位：${q[5]}</span>`}
+      else{const sel=ans[k]||"";for(let i=1;i<=q[3];i++)inner+=`<button class="oval" id="o-${k}-${i}" aria-pressed="${sel.includes(String(i))}" data-k="${k}" data-i="${i}" data-two="${q[4].length>1}" aria-label="問${q[1]} ${i}">${i}</button>`;
+        if(q[4].length>1)inner+=`<span class="tag">2つ</span>`}
+      r.innerHTML=`<div class="qno">${q[1]}<small>${KNAME[q[2]]}</small></div><div class="ovals">${inner}</div>`;
+      box.appendChild(r)});
+    el.appendChild(box)});
+}
+document.getElementById("sheet").addEventListener("click",e=>{
+  const b=e.target.closest(".oval");if(!b)return;const k=b.dataset.k,i=b.dataset.i,two=b.dataset.two==="true";
+  let v=ans[k]||"";
+  if(v.includes(i))v=v.replace(i,"");else if(two){v=(v.length>=2?v.slice(1):v)+i}else v=i;
+  v=v.split("").sort().join("");ans[k]=v;save();
+  b.parentElement.querySelectorAll(".oval").forEach(o=>o.setAttribute("aria-pressed",v.includes(o.dataset.i)));counts()});
+document.getElementById("sheet").addEventListener("input",e=>{if(e.target.classList.contains("num")){ans[e.target.id.slice(3)]=e.target.value.trim();save();counts()}});
+function correct(q){const v=ans[id(q)];if(q[3]==="c"){const n=parseFloat(String(v??"").replace(/[^\d.+-]/g,""));return !isNaN(n)&&Math.abs(n-parseFloat(q[4]))<1e-9}return v===q[4]}
+function grade(){
+  const res={H:[0,0],I:[0,0],J:[0,0]},dom={},wrong=[];
+  KEY.forEach(q=>{const c=correct(q);res[q[2]][1]++;if(c)res[q[2]][0]++;
+    dom[q[6]]=dom[q[6]]||[0,0];dom[q[6]][1]++;if(c)dom[q[6]][0]++;
+    if(!c)wrong.push(q)});
+  const hs=res.H[0], gen=res.I[0]+res.J[0]*2, genMax=res.I[1]+res.J[1]*2;
+  const answered=KEY.filter(isDone).length;
+  const pass=hs>=40;
+  const pct=(a,b)=>b?Math.round(a/b*100):0;
+  const rows=Object.entries(dom).sort((a,b)=>a[1][0]/a[1][1]-b[1][0]/b[1][1]).map(([d,[c,n]])=>{const p=pct(c,n);return `<tr><td>${d}</td><td>${c}/${n}</td><td style="width:40%"><div class="meter ${p<60?"low":""}"><span style="width:${p}%"></span></div></td><td>${p}%</td></tr>`}).join("");
+  const wl=wrong.map(q=>{const v=ans[id(q)];const yours=(v===undefined||v==="")?"未解答":(q[3]==="c"?v:v.split("").join("・"));const key=q[3]==="c"?q[4]+q[5]:q[4].split("").join("・");return `<span>${q[0]?"午後":"午前"}${q[1]}　あなた ${yours} → 正答 <b>${key}</b></span>`}).join("");
+  document.getElementById("v-res").innerHTML=`
+  <div class="summary">
+    <div class="card"><h3>必修問題（50点満点）</h3><div class="big">${hs}<small> / 50点</small></div>
+      <span class="pill ${pass?"ok":"ng"}">${pass?"合格基準（40点）に到達":"合格基準（40点）まであと"+(40-hs)+"点"}</span>
+      <p class="note">必修は毎年、満点の8割が基準です。</p></div>
+    <div class="card"><h3>一般・状況設定（250点満点）</h3><div class="big">${gen}<small> / ${genMax}点（${pct(gen,genMax)}%）</small></div>
+      <p class="note">一般は1問1点、状況設定は1問2点。合格基準は毎年の全体の結果で決まるため、本書では得点率で示します。</p></div>
+    <div class="card"><h3>解答した問題</h3><div class="big">${answered}<small> / 240問</small></div>
+      <p class="note">一般 ${res.I[0]}/${res.I[1]}問・状況設定 ${res.J[0]}/${res.J[1]}問 正解</p></div>
+  </div>
+  <h2>分野別の正答率（低い順）</h2>
+  <div class="tblwrap"><table><thead><tr><th>分野</th><th>正解</th><th>正答率</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+  <p class="note">6割未満の分野は赤で示しています。本の解説編で、その分野の問題から復習してください。</p>
+  <h2>まちがえた問題（${wrong.length}問）</h2>
+  <div class="wrong">${wl||"<span>すべて正解です</span>"}</div>`;
+  show("res");
+}
+function show(v){view=v;["am","pm","res"].forEach(x=>document.getElementById("tab-"+x).setAttribute("aria-selected",x===v));
+  document.getElementById("v-sheet").hidden=v==="res";document.getElementById("v-res").hidden=v!=="res";if(v!=="res")render();window.scrollTo(0,0)}
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{t.dataset.v==="res"?grade():show(t.dataset.v)}));
+["grade","grade2"].forEach(x=>document.getElementById(x).addEventListener("click",grade));
+document.getElementById("tbtn").addEventListener("click",e=>{running=!running;e.target.textContent=running?"一時停止":"タイマー再開";
+  if(running)tick=setInterval(()=>{if(remain>0){remain--;document.getElementById("timer").textContent=fmt(remain);if(remain%10===0)save()}else{clearInterval(tick);running=false;e.target.textContent="時間終了"}},1000);else clearInterval(tick)});
+document.getElementById("clear").addEventListener("click",()=>document.getElementById("confirm").hidden=false);
+document.getElementById("cno").addEventListener("click",()=>document.getElementById("confirm").hidden=true);
+document.getElementById("cyes").addEventListener("click",()=>{ans={};remain=9600;document.getElementById("timer").textContent=fmt(remain);save();document.getElementById("confirm").hidden=true;render();counts()});
+document.getElementById("sample").addEventListener("click",()=>{KEY.forEach((q,i)=>{const k=id(q);if(q[3]==="c")ans[k]=i%3?q[4]:"0";else{const right=(i*7)%10<7;ans[k]=right?q[4]:(q[4].length>1?"12":String(q[4]==="1"?2:1))}});save();render();counts()});
+document.getElementById("timer").textContent=fmt(remain);
+render();counts();
+</script>
+
+</body>
+</html>
